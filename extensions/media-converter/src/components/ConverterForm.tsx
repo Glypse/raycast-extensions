@@ -6,11 +6,9 @@ import {
   Toast,
   showInFinder,
   Icon,
-  openCommandPreferences,
   getPreferenceValues,
   Clipboard,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { convertMedia } from "../utils/converter";
 import {
@@ -56,7 +54,13 @@ import {
 import path from "path";
 import { execPromise } from "../utils/exec";
 
-export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
+export function ConverterForm({
+  initialFiles = [],
+  onFFmpegLost,
+}: {
+  initialFiles?: string[];
+  onFFmpegLost?: (message: string) => void;
+}) {
   const preferences = getPreferenceValues();
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
   const [currentFiles, setCurrentFiles] = useState<string[]>(initialFiles || []);
@@ -210,16 +214,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         // In theory, this should never happen
         // Check if the error is related to FFmpeg not being installed
         if (errorMessage.includes("FFmpeg is not installed or configured")) {
-          showFailureToast(new Error("FFmpeg needs to be configured to convert files"), {
-            title: "FFmpeg not found",
-            primaryAction: {
-              title: "Configure FFmpeg",
-              onAction: () => {
-                // Open command preferences to set FFmpeg path
-                openCommandPreferences();
-              },
-            },
-          });
+          onFFmpegLost?.("FFmpeg needs to be configured to convert files");
         } else {
           await showToast({ style: Toast.Style.Failure, title: "Conversion failed", message: errorMessage });
           console.error(`Conversion failed:`, errorMessage);

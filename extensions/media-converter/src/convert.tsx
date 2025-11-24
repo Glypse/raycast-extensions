@@ -95,5 +95,13 @@ export default function Command() {
     return <HelloPage onContinue={() => setHasSeenHelloPage(true)} lostFFmpegMessage={ffmpegLostMessage} />;
   }
 
-  return <ConverterForm initialFiles={initialFinderFiles} />;
+  return (
+    <ConverterForm
+      initialFiles={initialFinderFiles}
+      onFFmpegLost={(message) => {
+        setFFmpegLostMessage(message);
+        setHasSeenHelloPage(false);
+      }}
+    />
+  );
 }
